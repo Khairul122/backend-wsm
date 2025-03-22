@@ -4,15 +4,15 @@ import pymysql
 
 app = FastAPI()
 
-# Konfigurasi koneksi ke database
+# Konfigurasi koneksi ke MySQL di Clever Cloud
 db_config = {
-    "host": "localhost",
-    "user": "root",
-    "password": "",  # Ganti sesuai MySQL kamu
-    "database": "db_wsm"
+    "host": "bex01irce3djnhpwjand-mysql.services.clever-cloud.com",
+    "user": "uo8juyg29uxlsbav",
+    "password": "0X733MLaud2qAcrzJCoB",
+    "database": "bex01irce3djnhpwjand",
+    "port": 3306
 }
 
-# Model input login
 class LoginRequest(BaseModel):
     username: str
     password: str
@@ -24,23 +24,20 @@ def root():
 @app.post("/login")
 def login(request: LoginRequest):
     try:
-        # Koneksi ke database
         conn = pymysql.connect(**db_config)
         cursor = conn.cursor(pymysql.cursors.DictCursor)
 
-        # Query cek user
         sql = "SELECT * FROM users WHERE username = %s"
         cursor.execute(sql, (request.username,))
         user = cursor.fetchone()
 
-        # Cek hasil
         if not user:
             raise HTTPException(status_code=401, detail="Username tidak ditemukan")
         if user["password"] != request.password:
             raise HTTPException(status_code=401, detail="Password salah")
 
         return {"message": f"Selamat datang, {user['username']}!"}
-    
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
