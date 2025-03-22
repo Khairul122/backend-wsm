@@ -1,8 +1,15 @@
 from fastapi import APIRouter, HTTPException
 from conn import get_connection
+from pydantic import BaseModel
 import pymysql
 
 router = APIRouter()
+
+# Pydantic model
+class KriteriaRequest(BaseModel):
+    kode_kriteria: str
+    nama_kriteria: str
+    bobot: float
 
 # Get all kriteria
 @router.get("/kriteria")
@@ -18,7 +25,6 @@ def get_all_kriteria():
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
     finally:
         cursor.close()
         conn.close()
@@ -40,58 +46,54 @@ def get_kriteria_by_id(id: int):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
     finally:
         cursor.close()
         conn.close()
 
 # Add new kriteria
 @router.post("/kriteria")
-
-def add_kriteria(kriteria: dict):
+def add_kriteria(kriteria: KriteriaRequest):
     try:
         conn = get_connection()
-        cursor = conn.cursor(pymysql.cursors.DictCursor)
+        cursor = conn.cursor()
 
-        cursor.execute("INSERT INTO kriteria (nama, bobot) VALUES (%s, %s)", (kriteria["nama"], kriteria["bobot"]))
+        sql = "INSERT INTO kriteria (kode_kriteria, nama_kriteria, bobot) VALUES (%s, %s, %s)"
+        cursor.execute(sql, (kriteria.kode_kriteria, kriteria.nama_kriteria, kriteria.bobot))
         conn.commit()
 
         return {"message": "Kriteria berhasil ditambahkan"}
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
     finally:
         cursor.close()
         conn.close()
 
 # Update kriteria by ID
 @router.put("/kriteria/{id}")
-
-def update_kriteria(id: int, kriteria: dict):
+def update_kriteria(id: int, kriteria: KriteriaRequest):
     try:
         conn = get_connection()
-        cursor = conn.cursor(pymysql.cursors.DictCursor)
+        cursor = conn.cursor()
 
-        cursor.execute("UPDATE kriteria SET nama = %s, bobot = %s WHERE id = %s", (kriteria["nama"], kriteria["bobot"], id))
+        sql = "UPDATE kriteria SET kode_kriteria = %s, nama_kriteria = %s, bobot = %s WHERE id = %s"
+        cursor.execute(sql, (kriteria.kode_kriteria, kriteria.nama_kriteria, kriteria.bobot, id))
         conn.commit()
 
         return {"message": "Kriteria berhasil diperbarui"}
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
     finally:
         cursor.close()
         conn.close()
 
 # Delete kriteria by ID
 @router.delete("/kriteria/{id}")
-
 def delete_kriteria(id: int):
     try:
         conn = get_connection()
-        cursor = conn.cursor(pymysql.cursors.DictCursor)
+        cursor = conn.cursor()
 
         cursor.execute("DELETE FROM kriteria WHERE id = %s", (id,))
         conn.commit()
@@ -100,7 +102,6 @@ def delete_kriteria(id: int):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
     finally:
         cursor.close()
         conn.close()
