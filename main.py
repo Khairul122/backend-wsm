@@ -4,6 +4,7 @@ from api import LoginApi
 from api import KriteriaApi
 from api import AlternatifApi
 from api import PenilaianApi
+from api import PerhitunganApi
 
 app = FastAPI()
 
@@ -23,3 +24,4 @@ app.include_router(LoginApi.router, prefix="/api")
 app.include_router(KriteriaApi.router, prefix="/api")
 app.include_router(AlternatifApi.router, prefix="/api")
 app.include_router(PenilaianApi.router, prefix="/api")
+app.include_router(PerhitunganApi.router, prefix="/api")
